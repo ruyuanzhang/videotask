@@ -60,6 +60,16 @@ switch monitorname
     case 'uminn7tpsvpixx'
         
     case 'uminn3tbprojector'
+    case 'cmrrpsphlab'
+        mp.monitorName = 'cmrrpsphylab';
+        mp.size = [52, 36.5];  % width, height cm
+        mp.resolution = [1920, 1200]; % width height pixels
+        mp.refreshRate = 60; % hz
+        mp.viewDist = 70; % this is rough
+        mp.coil = {};
+        mp.pixPerDeg = (mp.resolution(1)/2)./ atand(mp.size(1)/2./mp.viewDist); %pix/deg
+        mp.pixPerArcmin = mp.pixPerDeg/60; %pix/arcmin
+        mp.gamma = 1;
     
     case 'uminnmacpro'
         mp.monitorName = 'uminmacpro';

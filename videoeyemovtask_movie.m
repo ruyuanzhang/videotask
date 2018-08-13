@@ -17,12 +17,21 @@ sp.runNo = 3;  %
 addpath(genpath('./utils'));
 
 %% debug purpose
-sp.eyelinkFile = []; % use eyeTracking if not empty;
-sp.videoFile = '/Users/ruyuan/Documents/Code_git/samplevideo/Interstellar - Ending Scene 1080p HD.mp4'; % the path of the video, we can read
+sp.wanteyelink = 'test.edf'; % use eyeTracking if not empty;
+sp.psylab = 1;
+%sp.videoFile = '/Users/ruyuan/Documents/Code_git/samplevideo/Interstellar - Ending Scene 1080p HD.mp4'; % the path of the video, we can read
+if sp.psylab 
+    sp.videoFile = '/Users/psphuser/Desktop/RuyuanZhang/samplevideo/Interstellar - Ending Scene 1080p HD.mp4'; % the path of the video, we can read
+    mp = getmonitorparams('cmrrpsphlab');
+    sp.deviceNum = 3; % devicenumber to record input
+else
+    sp.videoFile = '/Users/ruyuan/Documents/Code_git/samplevideo/Interstellar - Ending Scene 1080p HD.mp4'; % the path of the video, we can read
+    mp = getmonitorparams('uminnmacpro');
+    sp.deviceNum = 1; % devicenumber to record input
+end
 
 %mp = getmonitorparams('uminn7tpsboldscreen');
 %mp = getmonitorparams('uminnofficedesk');
-mp = getmonitorparams('uminnmacpro');
 sp.respKeys = {'1!','2@'};
 
 %% monitor parameter (mp)
@@ -54,9 +63,8 @@ sp.allowedKeys([20 41 30:34 89:93 79:80]) = 1;  %20,'q';41,'esc';89-93,'1'-'5';3
 getOutEarly = 0;
 when = 0;
 glitchcnt = 0;
-sp.deviceNum = 1; % devicenumber to record input
 %kbQueuecheck setup
-KbQueueCreate(1,sp.allowedKeys);
+KbQueueCreate(sp.deviceNum,sp.allowedKeys);
 
 %% open the window get information about the PT setup
 oldclut = pton([],[],[],1);
@@ -98,7 +106,7 @@ Screen('Flip',win);
 % issue the trigger and record it
 
 %% initialize, setup, calibrate, and start eyelink
-if ~isempty(sp.eyelinkFile)
+if sp.wanteyelink
   assert(EyelinkInit()==1);
   win = firstel(Screen('Windows'));
   el = EyelinkInitDefaults(win);
@@ -130,6 +138,8 @@ if ~isempty(sp.eyelinkFile)
   %   Eyelink('Message','SYNCTIME');
   % before we close out the eyelink.
 end
+Screen('FillRect',win,sp.COLOR_BLACK,winRect);
+Screen('Flip',win);
 %% now run the experiment
 % get trigger
 KbQueueStart(sp.deviceNum);
@@ -148,7 +158,7 @@ while 1
     if getOutEarly
        break;
     end
-    [keyIsDown,secs] = KbQueueCheck(sp.deviceNum);  % all devices, only check 'q','esc','1'-'5'
+    [keyIsDown,secs] = KbQueueCheck(sp.deviceNum);  % only check 'q','esc'
     if keyIsDown
         % get the name of the key and record it
         kn = KbName(secs);
@@ -188,18 +198,20 @@ Screen('PlayMovie', moviePtr, 0);
 % now close the movie
 Screen('CloseMovie', moviePtr);
 
+
+%% clean up and save data
+c = fix(clock);
+filename=sprintf('%d%02d%02d%02d%02d%02d_exp%s_subj%02d_run%02d',c(1),c(2),c(3),c(4),c(5),c(6),sp.expName,sp.subj,sp.runNo);
 %% close out eyelink
-if ~isempty(sp.eyelinkFile)
+if sp.wanteyelink)
   Eyelink('StopRecording');
   Eyelink('CloseFile');
   Eyelink('ReceiveFile');
   Eyelink('ShutDown');
-  movefile(eyetempfile,eyelinkfile);  % RENAME DOWNLOADED FILE TO THE FINAL FILENAME
+  movefile(eyetempfile,[filename,'edf']);  % RENAME DOWNLOADED FILE TO THE FINAL FILENAME
 end
 ptoff(oldclut);
 
 %% clean up and save data
 rmpath(genpath('./utils'));  % remove the utils path
-c = fix(clock);
-filename=sprintf('%d%02d%02d%02d%02d%02d_exp%s_subj%02d_run%02d',c(1),c(2),c(3),c(4),c(5),c(6),sp.expName,sp.subj,sp.runNo);
 save(filename); % save everything to the file;
