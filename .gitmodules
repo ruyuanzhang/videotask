@@ -1,0 +1,6 @@
+[submodule "utils/knkutils"]
+	path = utils/knkutils
+	url = git@github.com:kendrickkay/knkutils.git
+[submodule "utils/RZutil"]
+	path = utils/RZutil
+	url = git@github.com:ruyuanzhang/RZutil.git
