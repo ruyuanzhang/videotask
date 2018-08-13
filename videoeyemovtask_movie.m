@@ -17,7 +17,7 @@ sp.runNo = 3;  %
 addpath(genpath('./utils'));
 
 %% debug purpose
-sp.wanteyelink = 'test.edf'; % use eyeTracking if not empty;
+sp.wanteyelink = 1; % use eyeTracking if not empty;
 sp.psylab = 1;
 %sp.videoFile = '/Users/ruyuan/Documents/Code_git/samplevideo/Interstellar - Ending Scene 1080p HD.mp4'; % the path of the video, we can read
 if sp.psylab 
@@ -73,10 +73,13 @@ winRect = Screen('Rect',win);
 Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 mfi = Screen('GetFlipInterval',win);  % re-use what was found upon initialization!
 
+%% open the movie
+[moviePtr,dur,fps,width,height,count,aspectRatio] = Screen('OpenMovie',win, sp.videoFile);
+
 %% wait for a key press to start, start to show stimulus
 Screen('FillRect',win,sp.COLOR_BLACK,winRect);
 Screen('TextSize',win,30);Screen('TextFont',win,'Arial');
-Screen('DrawText', win, 'Press 5 to start, can press ESC to exit during the movie ...',winRect(3)/2-550, winRect(4)/2-50, 127);
+Screen('DrawText', win, 'Press 5 to start, can press ESC to exit during the movie ...',winRect(3)/2-450, winRect(4)/2-50, 127);
 Screen('Flip',win);
 fprintf('Press the trigger key to begin the movie. (make sure to turn off network, energy saver, spotlight, software updates! mirror mode on!)\n');
 safemode = 0;
@@ -144,12 +147,10 @@ Screen('Flip',win);
 % get trigger
 KbQueueStart(sp.deviceNum);
 %%
-% open the movie
-[moviePtr,dur,fps,width,height,count,aspectRatio] = Screen('OpenMovie',win, sp.videoFile);
-
 % now play the movie
 tic
 % send the trigger Here!
+startTime=GetSecs;
 Screen('PlayMovie',moviePtr, 1);
 % send the trigger Here!
 
@@ -194,7 +195,7 @@ toc
 
 % Stop playback:
 Screen('PlayMovie', moviePtr, 0);
-
+endTime=GetSecs;
 % now close the movie
 Screen('CloseMovie', moviePtr);
 
@@ -203,7 +204,7 @@ Screen('CloseMovie', moviePtr);
 c = fix(clock);
 filename=sprintf('%d%02d%02d%02d%02d%02d_exp%s_subj%02d_run%02d',c(1),c(2),c(3),c(4),c(5),c(6),sp.expName,sp.subj,sp.runNo);
 %% close out eyelink
-if sp.wanteyelink)
+if sp.wanteyelink
   Eyelink('StopRecording');
   Eyelink('CloseFile');
   Eyelink('ReceiveFile');
