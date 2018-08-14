@@ -17,8 +17,8 @@ sp.runNo = 3;  %
 addpath(genpath('./utils'));
 
 %% debug purpose
-sp.wanteyelink = 1; % use eyeTracking if not empty;
-sp.psylab = 1;
+sp.wanteyelink = 0; % use eyeTracking if not empty;
+sp.psylab = 0;
 %sp.videoFile = '/Users/ruyuan/Documents/Code_git/samplevideo/Interstellar - Ending Scene 1080p HD.mp4'; % the path of the video, we can read
 if sp.psylab 
     sp.videoFile = '/Users/psphuser/Desktop/RuyuanZhang/samplevideo/Interstellar - Ending Scene 1080p HD.mp4'; % the path of the video, we can read
@@ -79,7 +79,7 @@ mfi = Screen('GetFlipInterval',win);  % re-use what was found upon initializatio
 %% wait for a key press to start, start to show stimulus
 Screen('FillRect',win,sp.COLOR_BLACK,winRect);
 Screen('TextSize',win,30);Screen('TextFont',win,'Arial');
-Screen('DrawText', win, 'Press 5 to start, can press ESC to exit during the movie ...',winRect(3)/2-450, winRect(4)/2-50, 127);
+DrawFormattedText2('<color=.5,.5,.5>Press "5" to start\nPress "ESC" to exit during the movie ...', 'win',win,'sx','center','sy','center','xalign','center','yalign','center','xlayout','center');
 Screen('Flip',win);
 fprintf('Press the trigger key to begin the movie. (make sure to turn off network, energy saver, spotlight, software updates! mirror mode on!)\n');
 safemode = 0;
@@ -110,36 +110,7 @@ Screen('Flip',win);
 
 %% initialize, setup, calibrate, and start eyelink
 if sp.wanteyelink
-  assert(EyelinkInit()==1);
-  win = firstel(Screen('Windows'));
-  el = EyelinkInitDefaults(win);
-  [wwidth,wheight] = Screen('WindowSize',win);  % returns in pixels
-  fprintf('Pixel size of window is width: %d, height: %d.\n',wwidth,wheight);
-  Eyelink('command','screen_pixel_coords = %ld %ld %ld %ld',0,0,wwidth-1,wheight-1);
-  Eyelink('message','DISPLAY_COORDS %ld %ld %ld %ld',0,0,wwidth-1,wheight-1);
-  Eyelink('command','calibration_type = HV5');
-  Eyelink('command','active_eye = LEFT');
-  Eyelink('command','automatic_calibration_pacing=1500');
-    % what events (columns) are recorded in EDF:
-  Eyelink('command','file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON');
-    % what samples (columns) are recorded in EDF:
-  Eyelink('command','file_sample_data = LEFT,RIGHT,GAZE,HREF,AREA,GAZERES,STATUS');
-    % events available for real time:
-  Eyelink('command','link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON');
-    % samples available for real time:
-  Eyelink('command','link_sample_data = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS');
-  temp = regexp(datestr(now),'.+ (\d+):(\d+):(\d+)','tokens');  % HHMMSS    [or datestr(now,'HHMMSS') !]
-  eyetempfile = sprintf('%s.edf',cat(2,temp{1}{:}));
-  fprintf('Saving eyetracking data to %s.\n',eyetempfile);
-  Eyelink('Openfile',eyetempfile);  % NOTE THIS TEMPORARY FILENAME. REMEMBER THAT EYELINK REQUIRES SHORT FILENAME!
-  fprintf('Please perform calibration. When done, the subject should press a button in order to proceed.\n');
-  EyelinkDoTrackerSetup(el);
-%  EyelinkDoDriftCorrection(el);
-  fprintf('Button detected from subject. Starting recording of eyetracking data. Proceeding to stimulus setup.\n');
-  Eyelink('StartRecording');
-  % note that we expect that something should probably issue the command:
-  %   Eyelink('Message','SYNCTIME');
-  % before we close out the eyelink.
+    setupEyelink;
 end
 Screen('FillRect',win,sp.COLOR_BLACK,winRect);
 Screen('Flip',win);
