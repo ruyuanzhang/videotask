@@ -23,7 +23,7 @@ sp.psylab = 0;
 if sp.psylab 
     sp.videoFile = '/Users/psphuser/Desktop/RuyuanZhang/samplevideo/Interstellar - Ending Scene 1080p HD.mp4'; % the path of the video, we can read
     mp = getmonitorparams('cmrrpsphlab');
-    sp.deviceNum = 3; % devicenumber to record input
+    sp.deviceNum = max(GetKeyboardIndices); % devicenumber to record input
 else
     sp.videoFile = '/Users/ruyuan/Documents/Code_git/samplevideo/Interstellar - Ending Scene 1080p HD.mp4'; % the path of the video, we can read
     mp = getmonitorparams('uminnmacpro');
@@ -76,6 +76,12 @@ mfi = Screen('GetFlipInterval',win);  % re-use what was found upon initializatio
 %% open the movie
 [moviePtr,dur,fps,width,height,count,aspectRatio] = Screen('OpenMovie',win, sp.videoFile);
 
+%% initialize, setup, calibrate, and start eyelink
+if sp.wanteyelink
+    setupEyelink;
+end
+Screen('FillRect',win,sp.COLOR_BLACK,winRect);
+Screen('Flip',win);
 %% wait for a key press to start, start to show stimulus
 Screen('FillRect',win,sp.COLOR_BLACK,winRect);
 Screen('TextSize',win,30);Screen('TextFont',win,'Arial');
@@ -107,13 +113,6 @@ end
 fprintf('Experiment starts!\n');
 Screen('Flip',win);
 % issue the trigger and record it
-
-%% initialize, setup, calibrate, and start eyelink
-if sp.wanteyelink
-    setupEyelink;
-end
-Screen('FillRect',win,sp.COLOR_BLACK,winRect);
-Screen('Flip',win);
 %% now run the experiment
 % get trigger
 KbQueueStart(sp.deviceNum);
@@ -180,7 +179,7 @@ if sp.wanteyelink
   Eyelink('CloseFile');
   Eyelink('ReceiveFile');
   Eyelink('ShutDown');
-  movefile(eyetempfile,[filename,'edf']);  % RENAME DOWNLOADED FILE TO THE FINAL FILENAME
+  movefile(eyetempfile,[filename,'.edf']);  % RENAME DOWNLOADED FILE TO THE FINAL FILENAME
 end
 ptoff(oldclut);
 
